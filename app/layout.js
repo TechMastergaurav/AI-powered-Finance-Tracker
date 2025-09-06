@@ -25,7 +25,10 @@ export default function RootLayout({ children }) {
             {/* footer */}
             <footer className="bg-blue-50 py-12">
               <div className="container mx-auto px-4 text-center text-gray-600">
-                <p>Made with Gaurav</p>
+     <p className="text-base flex items-center justify-center gap-1">
+  <span className="text-lg">©</span>
+  WELTH
+</p>
               </div>
             </footer>
 

@@ -1,4 +1,5 @@
 "use client"
+import { bulkDeleteTransaction } from '@/actions/accounts'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -8,10 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { categoryColors } from '@/data/categories'
+import useFetch from '@/hooks/use-fetch'
 import { format } from 'date-fns'
 import { ChevronDown, ChevronUp, Clock, MoreHorizontal, RefreshCw, Search, Trash, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState,useEffect } from 'react'
+import { BarLoader } from 'react-spinners'
+import { toast } from 'sonner'
 const RECURRING_INTERVALS = {
   DAILY : "daily",
   WEEKLY : "weekly",
@@ -28,6 +32,7 @@ const TransactionTable = ({transactions}) => {
   const[searchTerm,setSearchTerm] = useState("");
   const[typeFilter,setTypeFilter] = useState("");
   const[recurringFilter,setRecurringFilter] = useState("");
+
 const filteredAndSortedTransaction = useMemo(() => {
   let result = [...transactions];
   
@@ -83,7 +88,21 @@ result.sort((a, b) => {
      setSelectedIds((current)=>
     current.length === filteredAndSortedTransaction.length?[]:filteredAndSortedTransaction.map((t)=>t.id)
     )}
-    const handleBulkDelete = () => {}
+    
+  const {loading:deleteLoading,fn:deletefn,data:deleted} = useFetch(bulkDeleteTransaction)
+    const handleBulkDelete = () => {
+      if(!window.confirm(
+        `Are you sure you want to delete ${selectedIds.length} transaction?`
+      )){
+        return;
+      }
+      deletefn(selectedIds)
+    }
+    useEffect(()=>{
+      if(deleted&&!deleteLoading){
+        toast.error("Transaction Deleted Successfully")
+      }
+    },[deleted,deleteLoading,router])
     const handleClearFilters = () => {
       setSearchTerm("");
       setTypeFilter("");
@@ -92,9 +111,12 @@ result.sort((a, b) => {
     }
   return (
     <div className='space-y-4'>
+    {deleteLoading && (
+        <BarLoader className="mt-4" width={"100%"} color="#9333ea" />
+      )}
       <div className='flex flex-col sm:flex-row gap-4'>
         <div className='relative flex-1'>
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground'"/>
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"/>
           <Input 
           placeholder="Search transactions..."
           value={searchTerm}
