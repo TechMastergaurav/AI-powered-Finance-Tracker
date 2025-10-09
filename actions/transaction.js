@@ -94,7 +94,8 @@ function calculateNextRecurringDate(startDate, interval) {
 }
 export async function scanReceipt(file){
 try{
-const model = genAI.getGenerativeModel({model:"gemini-1.5-flash"})
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({model:"gemini-2.5-flash"})
 const arrayBuffer = await file.arrayBuffer()
 const base64String = Buffer.from(arrayBuffer).toString("base64")
     const prompt = `
@@ -145,7 +146,7 @@ try{
    
 }
 }catch(error){
-    console(error.message)
+    console.log(error.message)
 throw new Error("Failed to scan receipt")
 }
 }
